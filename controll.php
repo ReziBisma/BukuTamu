@@ -10,17 +10,18 @@ if ($action === 'add') {
     $alamat = $_POST['Alamat'];
     $telepon = $_POST['Telp'];
 
-    if ($telepon !== '' && !ctype_digit($telepon)) {
-        $_SESSION['msg'] = "Nomor telepon hanya boleh berisi angka.";
-    } else {
-        $stmt = $conn->prepare("INSERT INTO tamu (nama, alamat, telepon) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $nama, $alamat, $telepon);
-        $stmt->execute();
-        $_SESSION['msg'] = "Data berhasil ditambahkan.";
-    }
-    header("Location: index.php");
+    // Buat ID unik (contoh format TAMU + timestamp)
+    $id_tamu = 'TAMU' . time();
+
+    $stmt = $conn->prepare("INSERT INTO tamu (id_tamu, nama, alamat, telepon) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("ssss", $id_tamu, $nama, $alamat, $telepon);
+    $stmt->execute();
+
+    $_SESSION['msg'] = "Data berhasil ditambahkan dengan ID: $id_tamu";
+    header("Location: export_import.php");
     exit;
 }
+
 
 if ($action === 'update') {
     $id = $_POST['id'];
@@ -98,11 +99,12 @@ if ($action === 'import_excel') {
     $firstRowLower = array_map('strtolower', $rows[0]);
     $hasHeader = in_array('nama', $firstRowLower) || in_array('alamat', $firstRowLower) || in_array('telepon', $firstRowLower);
 
-    $stmt = $conn->prepare("INSERT INTO tamu (nama, alamat, telepon) VALUES (?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO tamu (id_tamu, nama, alamat, telepon) VALUES (?, ?, ?, ?)");
     $countInserted = 0;
 
     foreach ($rows as $idx => $cols) {
         if ($hasHeader && $idx === 0) continue;
+
         $nama = $cols[0] ?? '';
         $alamat = $cols[1] ?? '';
         $telepon = $cols[2] ?? '';
@@ -114,7 +116,10 @@ if ($action === 'import_excel') {
         }
         $telepon = preg_replace('/\D+/', '', $telepon);
 
-        $stmt->bind_param("sss", $nama, $alamat, $telepon);
+        // Buat id_tamu unik seperti di add
+        $id_tamu = 'TAMU' . time() . rand(1000, 9999); // tambahan random agar unik saat import banyak sekaligus
+
+        $stmt->bind_param("ssss", $id_tamu, $nama, $alamat, $telepon);
         if ($stmt->execute()) $countInserted++;
     }
 
@@ -123,11 +128,12 @@ if ($action === 'import_excel') {
     exit;
 }
 
+
 if ($action === 'export_csv') {
     $filename = "buku_tamu_export_" . date("Y-m-d_H-i-s") . ".csv";
 
-    // Query semua data
-    $result = mysqli_query($conn, "SELECT nama, alamat, telepon FROM tamu");
+    // Query semua data, termasuk id_tamu
+    $result = mysqli_query($conn, "SELECT id_tamu, nama, alamat, telepon FROM tamu");
 
     // Set header agar browser download
     header('Content-Type: text/csv; charset=utf-8');
@@ -137,14 +143,13 @@ if ($action === 'export_csv') {
     $output = fopen('php://output', 'w');
 
     // Tulis header kolom
-    fputcsv($output, ['Nama', 'Alamat', 'Telepon']);
+    fputcsv($output, ['ID Tamu', 'Nama', 'Alamat', 'Telepon']);
 
     // Loop isi database
     while ($row = mysqli_fetch_assoc($result)) {
-        fputcsv($output, [$row['nama'], $row['alamat'], $row['telepon']]);
+        fputcsv($output, [$row['id_tamu'], $row['nama'], $row['alamat'], $row['telepon']]);
     }
 
     fclose($output);
     exit;
 }
-

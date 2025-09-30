@@ -29,6 +29,11 @@
           📤 Import / Export
         </a>
       </li>
+      <li class="mb-2">
+        <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'scan.php' ? 'active' : '' ?>" href="scan.php">
+          📷 Scan QR / Barcode
+        </a>
+      </li>
     </ul>
   </div>
 </div>
