@@ -10,10 +10,9 @@ if ($action === 'add') {
     $alamat = $_POST['Alamat'];
     $telepon = $_POST['Telp'];
 
-    // Buat ID unik (contoh format TAMU + timestamp)
     $id_tamu = 'TAMU' . time();
 
-    $stmt = $conn->prepare("INSERT INTO tamu (id_tamu, nama, alamat, telepon) VALUES (?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO tamu (id_tamu, nama, alamat, telepon, kehadiran) VALUES (?, ?, ?, ?, 'Tidak Hadir')");
     $stmt->bind_param("ssss", $id_tamu, $nama, $alamat, $telepon);
     $stmt->execute();
 
@@ -99,7 +98,8 @@ if ($action === 'import_excel') {
     $firstRowLower = array_map('strtolower', $rows[0]);
     $hasHeader = in_array('nama', $firstRowLower) || in_array('alamat', $firstRowLower) || in_array('telepon', $firstRowLower);
 
-    $stmt = $conn->prepare("INSERT INTO tamu (id_tamu, nama, alamat, telepon) VALUES (?, ?, ?, ?)");
+    // sekarang tambahkan kolom kehadiran default 'Tidak Hadir'
+    $stmt = $conn->prepare("INSERT INTO tamu (id_tamu, nama, alamat, telepon, kehadiran) VALUES (?, ?, ?, ?, 'Tidak Hadir')");
     $countInserted = 0;
 
     foreach ($rows as $idx => $cols) {
@@ -117,7 +117,7 @@ if ($action === 'import_excel') {
         $telepon = preg_replace('/\D+/', '', $telepon);
 
         // Buat id_tamu unik seperti di add
-        $id_tamu = 'TAMU' . time() . rand(1000, 9999); // tambahan random agar unik saat import banyak sekaligus
+        $id_tamu = 'TAMU' . time() . rand(1000, 9999);
 
         $stmt->bind_param("ssss", $id_tamu, $nama, $alamat, $telepon);
         if ($stmt->execute()) $countInserted++;
@@ -132,8 +132,8 @@ if ($action === 'import_excel') {
 if ($action === 'export_csv') {
     $filename = "buku_tamu_export_" . date("Y-m-d_H-i-s") . ".csv";
 
-    // Query semua data, termasuk id_tamu
-    $result = mysqli_query($conn, "SELECT id_tamu, nama, alamat, telepon FROM tamu");
+    // Query semua data, sekarang termasuk kehadiran
+    $result = mysqli_query($conn, "SELECT id_tamu, nama, alamat, telepon, kehadiran FROM tamu");
 
     // Set header agar browser download
     header('Content-Type: text/csv; charset=utf-8');
@@ -143,11 +143,17 @@ if ($action === 'export_csv') {
     $output = fopen('php://output', 'w');
 
     // Tulis header kolom
-    fputcsv($output, ['ID Tamu', 'Nama', 'Alamat', 'Telepon']);
+    fputcsv($output, ['ID Tamu', 'Nama', 'Alamat', 'Telepon', 'Kehadiran']);
 
     // Loop isi database
     while ($row = mysqli_fetch_assoc($result)) {
-        fputcsv($output, [$row['id_tamu'], $row['nama'], $row['alamat'], $row['telepon']]);
+        fputcsv($output, [
+            $row['id_tamu'],
+            $row['nama'],
+            $row['alamat'],
+            $row['telepon'],
+            $row['kehadiran']
+        ]);
     }
 
     fclose($output);

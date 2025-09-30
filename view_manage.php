@@ -50,6 +50,7 @@
         <th>Nama</th>
         <th>Alamat</th>
         <th>Telepon</th>
+        <th>Kehadiran</th>
         <th>QR Code</th>
         <th>Aksi</th>
       </tr>
@@ -61,29 +62,34 @@
           <td><?= htmlspecialchars($row['nama']) ?></td>
           <td><?= htmlspecialchars(encryptCaesar($row['alamat'], 3)) ?></td>
           <td><?= htmlspecialchars(encryptCaesar($row['telepon'], 3)) ?></td>
+          <td><?= $row['kehadiran']?></td>
           <td>
             <?php
               if (!empty($row['id_tamu'])) {
                   $qr = new \Endroid\QrCode\QrCode($row['id_tamu']);
                   $writer = new \Endroid\QrCode\Writer\PngWriter();
                   $qrResult = $writer->write($qr);
-                  echo '<img src="data:image/png;base64,' . base64_encode($qrResult->getString()) . '" width="80" height="80" />';
+
+                  echo '<img src="data:image/png;base64,' . base64_encode($qrResult->getString()) . '" width="80" height="80" /><br>';
+
+                  // tombol download
+                  echo '<a href="download_qr.php?id=' . urlencode($row['id_tamu']) . '" class="btn btn-sm btn-primary mt-1">Download</a>';
               } else {
                   echo 'Data QR tidak tersedia';
               }
             ?>
           </td>
           <td>
-            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal<?= $row['id_tamu'] ?>">Edit</button>
+            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal<?= $row['id'] ?>">Edit</button>
             <form action="controll.php" method="post" style="display:inline-block;">
-              <input type="hidden" name="id" value="<?= $row['id_tamu'] ?>">
+              <input type="hidden" name="id" value="<?= $row['id'] ?>">
               <button type="submit" name="action" value="delete" class="btn btn-danger btn-sm">Hapus</button>
             </form>
           </td>
         </tr>
 
         <!-- Modal Edit -->
-        <div class="modal fade" id="editModal<?= $row['id_tamu'] ?>" tabindex="-1">
+        <div class="modal fade" id="editModal<?= $row['id'] ?>" tabindex="-1">
           <div class="modal-dialog">
             <div class="modal-content">
               <form action="controll.php" method="post">
@@ -92,7 +98,7 @@
                   <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                  <input type="hidden" name="id" value="<?= $row['id_tamu'] ?>">
+                  <input type="hidden" name="id" value="<?= $row['id'] ?>">
                   <div class="mb-3"><label>Nama</label><input type="text" name="Nama" class="form-control" value="<?= htmlspecialchars($row['nama']) ?>"></div>
                   <div class="mb-3"><label>Alamat</label><input type="text" name="Alamat" class="form-control" value="<?= htmlspecialchars($row['alamat']) ?>"></div>
                   <div class="mb-3"><label>Telepon</label><input type="text" name="Telp" class="form-control" value="<?= htmlspecialchars($row['telepon']) ?>"></div>

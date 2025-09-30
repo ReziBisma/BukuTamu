@@ -20,6 +20,7 @@
         <th>Nama</th>
         <th>Alamat</th>
         <th>Telepon</th>
+        <th>Kehadiran</th>
       </tr>
     </thead>
     <tbody>
@@ -28,6 +29,7 @@
           <td><?= htmlspecialchars($row['nama']) ?></td>
           <td><?= htmlspecialchars(encryptCaesar($row['alamat'], 3)) ?></td>
           <td><?= htmlspecialchars(encryptCaesar($row['telepon'], 3)) ?></td>
+          <td><?= $row['kehadiran']?></td>
         </tr>
       <?php endwhile; ?>
     </tbody>
