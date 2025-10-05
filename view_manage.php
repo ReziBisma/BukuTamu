@@ -11,7 +11,28 @@
 <?php include 'header.php'; ?>
 
 <div class="container">
+
   <h3 class="mb-3">Kelola Data Tamu</h3>
+
+  <?php
+    // hitung total hadir & tidak hadir Container
+    $totalHadir = 0;
+    $totalTidakHadir = 0;
+
+    $resHadir = mysqli_query($conn, "SELECT COUNT(*) as jml FROM tamu WHERE kehadiran='Hadir'");
+    if ($resHadir) {
+        $rowHadir = mysqli_fetch_assoc($resHadir);
+        $totalHadir = $rowHadir['jml'];
+    }
+
+    $resTidak = mysqli_query($conn, "SELECT COUNT(*) as jml FROM tamu WHERE kehadiran='Tidak Hadir'");
+    if ($resTidak) {
+        $rowTidak = mysqli_fetch_assoc($resTidak);
+        $totalTidakHadir = $rowTidak['jml'];
+    }
+?>
+
+
 
   <?php if (isset($_SESSION['msg'])): ?>
     <div class="alert alert-info"><?= $_SESSION['msg']; unset($_SESSION['msg']); ?></div>
@@ -41,6 +62,19 @@
   <form action="controll.php" method="post" style="display:inline-block; margin-bottom: 15px;">
     <button type="submit" name="action" value="export_csv" class="btn btn-info">Export CSV</button>
   </form>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <div class="alert alert-success">
+        ✅ Total Hadir: <strong><?= $totalHadir ?></strong>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="alert alert-warning">
+        ⏳ Total Tidak Hadir: <strong><?= $totalTidakHadir ?></strong>
+      </div>
+    </div>
+  </div>
 
   <!-- Tabel -->
   <table class="table table-bordered table-striped mt-3">
