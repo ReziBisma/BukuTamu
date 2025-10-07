@@ -18,8 +18,9 @@
     <thead>
       <tr>
         <th>Nama</th>
-        <th>Alamat</th>
-        <th>Telepon</th>
+        <th>Lokasi Acara</th>
+        <th>Email</th>
+        <th>Tipe pengunjung</th>
         <th>Kehadiran</th>
       </tr>
     </thead>
@@ -27,8 +28,9 @@
       <?php while ($row = mysqli_fetch_assoc($result)): ?>
         <tr>
           <td><?= htmlspecialchars($row['nama']) ?></td>
-          <td><?= htmlspecialchars(encryptCaesar($row['alamat'], 3)) ?></td>
-          <td><?= htmlspecialchars(encryptCaesar($row['telepon'], 3)) ?></td>
+          <td><?= htmlspecialchars($row['lokasi_acara']) ?></td>
+          <td><?= htmlspecialchars(encryptCaesar($row['email'], 3)) ?></td>
+          <td><?= htmlspecialchars($row['role']) ?></td>
           <td><?= $row['kehadiran']?></td>
         </tr>
       <?php endwhile; ?>

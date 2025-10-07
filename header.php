@@ -6,7 +6,7 @@
       ☰
     </button>
     <a class="navbar-brand fw-bold text-primary ms-3" href="index.php">
-      📖 Buku Tamu Digital
+      PEMBUKUAN LAWAKFEST
     </a>
   </div>
 </nav>
@@ -30,7 +30,7 @@
         </a>
       </li>
       <li class="mb-2">
-        <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'register.php' ? 'active fw-bold text-primary' : '' ?>" href="register.php">
+        <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'register.php' ? 'active fw-bold text-primary' : '' ?>" href="beli_tiket.php">
           ✍️ Registrasi Tamu
         </a>
       </li>

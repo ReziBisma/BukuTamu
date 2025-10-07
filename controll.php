@@ -5,15 +5,17 @@ session_start();
 
 $action = $_POST['action'] ?? '';
 
+// ========== TAMBAH DATA ==========
 if ($action === 'add') {
     $nama = $_POST['Nama'];
-    $alamat = $_POST['Alamat'];
-    $telepon = $_POST['Telp'];
+    $lokasi_acara = $_POST['Lokasi'];
+    $email = $_POST['Email'];
+    $role = $_POST['Role'];
 
     $id_tamu = 'TAMU' . time();
 
-    $stmt = $conn->prepare("INSERT INTO tamu (id_tamu, nama, alamat, telepon, kehadiran) VALUES (?, ?, ?, ?, 'Tidak Hadir')");
-    $stmt->bind_param("ssss", $id_tamu, $nama, $alamat, $telepon);
+    $stmt = $conn->prepare("INSERT INTO tamu (id_tamu, nama, lokasi_acara, email, role, kehadiran) VALUES (?, ?, ?, ?, ?, 'Tidak Hadir')");
+    $stmt->bind_param("sssss", $id_tamu, $nama, $lokasi_acara, $email, $role);
     $stmt->execute();
 
     $_SESSION['msg'] = "Data berhasil ditambahkan dengan ID: $id_tamu";
@@ -22,34 +24,38 @@ if ($action === 'add') {
 }
 
 
+// ========== UPDATE DATA ==========
 if ($action === 'update') {
     $id = $_POST['id'];
     $nama = $_POST['Nama'];
-    $alamat = $_POST['Alamat'];
-    $telepon = $_POST['Telp'];
+    $lokasi_acara = $_POST['Lokasi'];
+    $email = $_POST['Email'];
+    $role = $_POST['Role'];
 
-    if ($telepon !== '' && !ctype_digit($telepon)) {
-        $_SESSION['msg'] = "Nomor telepon hanya boleh berisi angka.";
-    } else {
-        $stmt = $conn->prepare("UPDATE tamu SET nama=?, alamat=?, telepon=? WHERE id=?");
-        $stmt->bind_param("sssi", $nama, $alamat, $telepon, $id);
-        $stmt->execute();
-        $_SESSION['msg'] = "Data berhasil diupdate.";
-    }
+    $stmt = $conn->prepare("UPDATE tamu SET nama=?, lokasi_acara=?, email=?, role=? WHERE id=?");
+    $stmt->bind_param("ssssi", $nama, $lokasi_acara, $email, $role, $id);
+    $stmt->execute();
+
+    $_SESSION['msg'] = "Data berhasil diupdate.";
     header("Location: index.php");
     exit;
 }
 
+
+// ========== HAPUS DATA ==========
 if ($action === 'delete') {
     $id = $_POST['id'];
     $stmt = $conn->prepare("DELETE FROM tamu WHERE id=?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
+
     $_SESSION['msg'] = "Data berhasil dihapus.";
     header("Location: index.php");
     exit;
 }
 
+
+// ========== IMPORT EXCEL / CSV ==========
 if ($action === 'import_excel') {
     if (!isset($_FILES['excel_file']) || $_FILES['excel_file']['error'] !== UPLOAD_ERR_OK) {
         $_SESSION['msg'] = "Gagal upload file.";
@@ -96,30 +102,29 @@ if ($action === 'import_excel') {
     }
 
     $firstRowLower = array_map('strtolower', $rows[0]);
-    $hasHeader = in_array('nama', $firstRowLower) || in_array('alamat', $firstRowLower) || in_array('telepon', $firstRowLower);
+    $hasHeader = in_array('nama', $firstRowLower) 
+              || in_array('lokasi_acara', $firstRowLower)
+              || in_array('email', $firstRowLower)
+              || in_array('role', $firstRowLower);
 
-    // sekarang tambahkan kolom kehadiran default 'Tidak Hadir'
-    $stmt = $conn->prepare("INSERT INTO tamu (id_tamu, nama, alamat, telepon, kehadiran) VALUES (?, ?, ?, ?, 'Tidak Hadir')");
+    // Query insert sesuai struktur baru
+    $stmt = $conn->prepare("INSERT INTO tamu (id_tamu, nama, lokasi_acara, email, role, kehadiran) VALUES (?, ?, ?, ?, ?, 'Tidak Hadir')");
     $countInserted = 0;
 
     foreach ($rows as $idx => $cols) {
         if ($hasHeader && $idx === 0) continue;
 
         $nama = $cols[0] ?? '';
-        $alamat = $cols[1] ?? '';
-        $telepon = $cols[2] ?? '';
+        $lokasi_acara = $cols[1] ?? '';
+        $email = $cols[2] ?? '';
+        $role = $cols[3] ?? 'Reguler';
 
-        if ($nama === '' && $alamat === '' && $telepon === '') continue;
+        if ($nama === '' && $lokasi_acara === '' && $email === '') continue;
 
-        if ($telepon !== '' && !ctype_digit(preg_replace('/\D+/', '', $telepon))) {
-            continue;
-        }
-        $telepon = preg_replace('/\D+/', '', $telepon);
-
-        // Buat id_tamu unik seperti di add
+        // id tamu unik
         $id_tamu = 'TAMU' . time() . rand(1000, 9999);
 
-        $stmt->bind_param("ssss", $id_tamu, $nama, $alamat, $telepon);
+        $stmt->bind_param("sssss", $id_tamu, $nama, $lokasi_acara, $email, $role);
         if ($stmt->execute()) $countInserted++;
     }
 
@@ -129,29 +134,49 @@ if ($action === 'import_excel') {
 }
 
 
+// ========== EXPORT CSV ==========
 if ($action === 'export_csv') {
+    $filterKota = $_POST['filter_kota'] ?? 'semua';
     $filename = "buku_tamu_export_" . date("Y-m-d_H-i-s") . ".csv";
 
-    // Query semua data, sekarang termasuk kehadiran
-    $result = mysqli_query($conn, "SELECT id_tamu, nama, alamat, telepon, kehadiran FROM tamu");
+    if ($filterKota !== 'semua') {
+        $query = "SELECT * FROM tamu WHERE lokasi_acara = '$filterKota'";
+    } else {
+        $query = "SELECT * FROM tamu";
+    }
 
-    // Set header agar browser download
+    $result = mysqli_query($conn, $query);
+
+    // Hitung total hadir / tidak hadir di hasil filter
+    $hadir = mysqli_fetch_assoc(mysqli_query($conn, 
+        "SELECT COUNT(*) as jml FROM tamu WHERE kehadiran='Hadir' " . 
+        ($filterKota !== 'semua' ? "AND lokasi_acara='$filterKota'" : "")
+    ))['jml'] ?? 0;
+
+    $tidak = mysqli_fetch_assoc(mysqli_query($conn, 
+        "SELECT COUNT(*) as jml FROM tamu WHERE kehadiran='Tidak Hadir' " . 
+        ($filterKota !== 'semua' ? "AND lokasi_acara='$filterKota'" : "")
+    ))['jml'] ?? 0;
+
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename=' . $filename);
 
-    // Output buffer ke "php://output"
     $output = fopen('php://output', 'w');
 
-    // Tulis header kolom
-    fputcsv($output, ['ID Tamu', 'Nama', 'Alamat', 'Telepon', 'Kehadiran']);
+    // Header file
+    fputcsv($output, ['Filter Kota:', $filterKota === 'semua' ? 'Semua Kota' : $filterKota]);
+    fputcsv($output, ['Total Hadir:', $hadir]);
+    fputcsv($output, ['Total Tidak Hadir:', $tidak]);
+    fputcsv($output, []); // baris kosong
+    fputcsv($output, ['ID Tamu', 'Nama', 'Lokasi Acara', 'Email', 'Role', 'Kehadiran']);
 
-    // Loop isi database
     while ($row = mysqli_fetch_assoc($result)) {
         fputcsv($output, [
             $row['id_tamu'],
             $row['nama'],
-            $row['alamat'],
-            $row['telepon'],
+            $row['lokasi_acara'],
+            $row['email'],
+            $row['role'],
             $row['kehadiran']
         ]);
     }
@@ -159,3 +184,4 @@ if ($action === 'export_csv') {
     fclose($output);
     exit;
 }
+?>
