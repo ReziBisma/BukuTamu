@@ -134,54 +134,127 @@ if ($action === 'import_excel') {
 }
 
 
-// ========== EXPORT CSV ==========
 if ($action === 'export_csv') {
     $filterKota = $_POST['filter_kota'] ?? 'semua';
     $filename = "buku_tamu_export_" . date("Y-m-d_H-i-s") . ".csv";
 
-    if ($filterKota !== 'semua') {
-        $query = "SELECT * FROM tamu WHERE lokasi_acara = '$filterKota'";
-    } else {
-        $query = "SELECT * FROM tamu";
-    }
-
-    $result = mysqli_query($conn, $query);
-
-    // Hitung total hadir / tidak hadir di hasil filter
-    $hadir = mysqli_fetch_assoc(mysqli_query($conn, 
-        "SELECT COUNT(*) as jml FROM tamu WHERE kehadiran='Hadir' " . 
-        ($filterKota !== 'semua' ? "AND lokasi_acara='$filterKota'" : "")
-    ))['jml'] ?? 0;
-
-    $tidak = mysqli_fetch_assoc(mysqli_query($conn, 
-        "SELECT COUNT(*) as jml FROM tamu WHERE kehadiran='Tidak Hadir' " . 
-        ($filterKota !== 'semua' ? "AND lokasi_acara='$filterKota'" : "")
-    ))['jml'] ?? 0;
-
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename=' . $filename);
-
     $output = fopen('php://output', 'w');
 
-    // Header file
-    fputcsv($output, ['Filter Kota:', $filterKota === 'semua' ? 'Semua Kota' : $filterKota]);
-    fputcsv($output, ['Total Hadir:', $hadir]);
-    fputcsv($output, ['Total Tidak Hadir:', $tidak]);
-    fputcsv($output, []); // baris kosong
+    // Header kolom CSV utama
     fputcsv($output, ['ID Tamu', 'Nama', 'Lokasi Acara', 'Email', 'Role', 'Kehadiran']);
 
-    while ($row = mysqli_fetch_assoc($result)) {
+    // Ambil harga tiket dari tabel produk
+    $hargaVIP = 0;
+    $hargaReg = 0;
+    $resHarga = mysqli_query($conn, "SELECT * FROM produk");
+    while ($prod = mysqli_fetch_assoc($resHarga)) {
+        if (strtolower($prod['nama_produk']) == 'vip') {
+            $hargaVIP = (int)$prod['harga'];
+        } elseif (strtolower($prod['nama_produk']) == 'reguler') {
+            $hargaReg = (int)$prod['harga'];
+        }
+    }
+
+    if ($filterKota !== 'semua') {
+        // FILTER berdasarkan satu kota
+        $stmt = $conn->prepare("SELECT id_tamu, nama, lokasi_acara, email, role, kehadiran FROM tamu WHERE lokasi_acara=?");
+        $stmt->bind_param("s", $filterKota);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        while ($row = $result->fetch_assoc()) {
+            fputcsv($output, [
+                $row['id_tamu'],
+                $row['nama'],
+                $row['lokasi_acara'],
+                $row['email'],
+                $row['role'],
+                $row['kehadiran']
+            ]);
+        }
+
+        // Hitung rekap kehadiran + role + total pendapatan kota
+        $rekap = mysqli_query($conn, "
+            SELECT 
+              SUM(CASE WHEN kehadiran='Hadir' THEN 1 ELSE 0 END) AS total_hadir,
+              SUM(CASE WHEN kehadiran='Tidak Hadir' THEN 1 ELSE 0 END) AS total_tidak,
+              SUM(CASE WHEN role='VIP' THEN 1 ELSE 0 END) AS total_vip,
+              SUM(CASE WHEN role='Reguler' THEN 1 ELSE 0 END) AS total_reguler
+            FROM tamu WHERE lokasi_acara='$filterKota'
+        ");
+        $rekapData = mysqli_fetch_assoc($rekap);
+
+        $totalPendapatan = ($rekapData['total_vip'] * $hargaVIP) + ($rekapData['total_reguler'] * $hargaReg);
+
+        fputcsv($output, []);
+        fputcsv($output, ['Rekap Kota', 'Hadir', 'Tidak Hadir', 'VIP', 'Reguler', 'Pendapatan (Rp)']);
         fputcsv($output, [
-            $row['id_tamu'],
-            $row['nama'],
-            $row['lokasi_acara'],
-            $row['email'],
-            $row['role'],
-            $row['kehadiran']
+            $filterKota,
+            $rekapData['total_hadir'],
+            $rekapData['total_tidak'],
+            $rekapData['total_vip'],
+            $rekapData['total_reguler'],
+            number_format($totalPendapatan, 0, ',', '.')
         ]);
+
+    } else {
+        // SEMUA KOTA
+        $result = mysqli_query($conn, "SELECT id_tamu, nama, lokasi_acara, email, role, kehadiran FROM tamu");
+        while ($row = mysqli_fetch_assoc($result)) {
+            fputcsv($output, [
+                $row['id_tamu'],
+                $row['nama'],
+                $row['lokasi_acara'],
+                $row['email'],
+                $row['role'],
+                $row['kehadiran']
+            ]);
+        }
+
+        fputcsv($output, []);
+        fputcsv($output, ['Rekap Per Kota']);
+        fputcsv($output, ['Kota', 'Total Hadir', 'Total Tidak Hadir', 'VIP', 'Reguler', 'Pendapatan (Rp)']);
+
+        $rekapAll = mysqli_query($conn, "
+            SELECT lokasi_acara,
+              SUM(CASE WHEN kehadiran='Hadir' THEN 1 ELSE 0 END) AS total_hadir,
+              SUM(CASE WHEN kehadiran='Tidak Hadir' THEN 1 ELSE 0 END) AS total_tidak,
+              SUM(CASE WHEN role='VIP' THEN 1 ELSE 0 END) AS total_vip,
+              SUM(CASE WHEN role='Reguler' THEN 1 ELSE 0 END) AS total_reguler
+            FROM tamu
+            GROUP BY lokasi_acara
+        ");
+
+        while ($rekap = mysqli_fetch_assoc($rekapAll)) {
+            $pendapatan = ($rekap['total_vip'] * $hargaVIP) + ($rekap['total_reguler'] * $hargaReg);
+            fputcsv($output, [
+                $rekap['lokasi_acara'],
+                $rekap['total_hadir'],
+                $rekap['total_tidak'],
+                $rekap['total_vip'],
+                $rekap['total_reguler'],
+                number_format($pendapatan, 0, ',', '.')
+            ]);
+        }
+
+        // Tambahkan total keseluruhan (opsional)
+        $totalAll = mysqli_query($conn, "
+            SELECT
+              SUM(CASE WHEN role='VIP' THEN 1 ELSE 0 END) AS total_vip,
+              SUM(CASE WHEN role='Reguler' THEN 1 ELSE 0 END) AS total_reguler
+            FROM tamu
+        ");
+        $sum = mysqli_fetch_assoc($totalAll);
+        $totalPendapatanAll = ($sum['total_vip'] * $hargaVIP) + ($sum['total_reguler'] * $hargaReg);
+
+        fputcsv($output, []);
+        fputcsv($output, ['Total Keseluruhan', '', '', '', '', number_format($totalPendapatanAll, 0, ',', '.')]);
     }
 
     fclose($output);
     exit;
 }
+
 ?>
