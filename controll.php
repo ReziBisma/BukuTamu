@@ -186,12 +186,14 @@ if ($action === 'export_csv') {
         ");
         $rekapData = mysqli_fetch_assoc($rekap);
 
+        $totalPeserta = $rekapData['total_hadir'] + $rekapData['total_tidak'];
         $totalPendapatan = ($rekapData['total_vip'] * $hargaVIP) + ($rekapData['total_reguler'] * $hargaReg);
 
         fputcsv($output, []);
-        fputcsv($output, ['Rekap Kota', 'Hadir', 'Tidak Hadir', 'VIP', 'Reguler', 'Pendapatan (Rp)']);
+        fputcsv($output, ['Rekap Kota', 'Total Peserta', 'Hadir', 'Tidak Hadir', 'VIP', 'Reguler', 'Pendapatan (Rp)']);
         fputcsv($output, [
             $filterKota,
+            $totalPeserta,
             $rekapData['total_hadir'],
             $rekapData['total_tidak'],
             $rekapData['total_vip'],
@@ -215,7 +217,7 @@ if ($action === 'export_csv') {
 
         fputcsv($output, []);
         fputcsv($output, ['Rekap Per Kota']);
-        fputcsv($output, ['Kota', 'Total Hadir', 'Total Tidak Hadir', 'VIP', 'Reguler', 'Pendapatan (Rp)']);
+        fputcsv($output, ['Kota', 'Total Hadir', 'Total Tidak Hadir', 'Total Pengunjung', 'VIP', 'Reguler', 'Pendapatan (Rp)']);
 
         $rekapAll = mysqli_query($conn, "
             SELECT lokasi_acara,
@@ -227,34 +229,35 @@ if ($action === 'export_csv') {
             GROUP BY lokasi_acara
         ");
 
+        $grandTotalPeserta = 0;
+        $grandTotalPendapatan = 0;
+
         while ($rekap = mysqli_fetch_assoc($rekapAll)) {
+            $totalPeserta = $rekap['total_hadir'] + $rekap['total_tidak'];
             $pendapatan = ($rekap['total_vip'] * $hargaVIP) + ($rekap['total_reguler'] * $hargaReg);
+
+            $grandTotalPeserta += $totalPeserta;
+            $grandTotalPendapatan += $pendapatan;
+
             fputcsv($output, [
                 $rekap['lokasi_acara'],
                 $rekap['total_hadir'],
                 $rekap['total_tidak'],
+                $totalPeserta, // 🔹 kolom baru: total pengunjung
                 $rekap['total_vip'],
                 $rekap['total_reguler'],
                 number_format($pendapatan, 0, ',', '.')
             ]);
         }
 
-        // Tambahkan total keseluruhan (opsional)
-        $totalAll = mysqli_query($conn, "
-            SELECT
-              SUM(CASE WHEN role='VIP' THEN 1 ELSE 0 END) AS total_vip,
-              SUM(CASE WHEN role='Reguler' THEN 1 ELSE 0 END) AS total_reguler
-            FROM tamu
-        ");
-        $sum = mysqli_fetch_assoc($totalAll);
-        $totalPendapatanAll = ($sum['total_vip'] * $hargaVIP) + ($sum['total_reguler'] * $hargaReg);
-
+        // Tambahkan total keseluruhan
         fputcsv($output, []);
-        fputcsv($output, ['Total Keseluruhan', '', '', '', '', number_format($totalPendapatanAll, 0, ',', '.')]);
+        fputcsv($output, ['Total Keseluruhan', '', '', $grandTotalPeserta, '', '', number_format($grandTotalPendapatan, 0, ',', '.')]);
     }
 
     fclose($output);
     exit;
 }
+
 
 ?>

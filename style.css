@@ -59,3 +59,39 @@ input[disabled] {
 tfoot input {
   border-radius: 10px;
 }
+
+body {
+      background: #f8fafc;
+      font-family: 'Poppins', sans-serif;
+    }
+    .card-stat {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+      transition: 0.3s;
+    }
+    .card-stat:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    }
+    .table th {
+      background: #f1f5f9;
+    }
+    .btn-ticket {
+      border-radius: 50px;
+      font-weight: 600;
+      padding: 10px 30px;
+      font-size: 18px;
+      background: linear-gradient(45deg, #ff8a00, #e52e71);
+      border: none;
+      color: white;
+      box-shadow: 0 4px 10px rgba(229,46,113,0.4);
+      transition: 0.3s;
+    }
+    .btn-ticket:hover {
+      background: linear-gradient(45deg, #e52e71, #ff8a00);
+      transform: scale(1.05);
+    }
+    .pagination .page-link {
+      border-radius: 8px;
+    }
