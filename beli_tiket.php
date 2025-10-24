@@ -73,7 +73,7 @@ if (isset($_GET['success']) && isset($_SESSION['qr_image'])) {
 
 <div class="container mt-4">
   <h3>Beli Tiket Acara</h3>
-  <p>Pilih jenis tiket dan lengkapi data Anda untuk mendapatkan QR ID tamu.</p>
+  <p>Pilih jenis tiket dan lengkapi data Anda untuk mendapatkan QR Ticket Masuk.</p>
 
   <?php if ($msg): ?>
     <div class="alert alert-success"><?= $msg ?></div>
@@ -118,11 +118,6 @@ if (isset($_GET['success']) && isset($_SESSION['qr_image'])) {
 
     <a href="download_qr.php?id=<?= urlencode($id_tamu) ?>" class="btn btn-primary mt-2">📥 Download QR</a>
 
-    <div class="text-center mt-4">
-      <h6>Simulasi Pembayaran:</h6>
-      <img src="assets/qris.jpg" alt="QRIS" style="max-width:250px" class="img-fluid">
-      <p class="text-muted">Bayar melalui QRIS ini (simulasi, tidak perlu benar-benar membayar).</p>
-    </div>
 
     <!-- Modal QR besar -->
     <div class="modal fade" id="qrModal" tabindex="-1">
