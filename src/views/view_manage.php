@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <title>Buku Tamu - Manajemen</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="assets/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 </head>
 <body>
 
-<?php include 'header.php'; ?>
+<?php include __DIR__ . '/header.php'; ?>
 
 <div class="container">
 
@@ -39,7 +39,6 @@
     <div class="alert alert-info"><?= $_SESSION['msg']; unset($_SESSION['msg']); ?></div>
   <?php endif; ?>
 
-  <!-- Form tambah -->
   <form action="controll.php" method="post" class="mb-3">
     <div class="row g-2">
       <div class="col-md-3"><input type="text" name="Nama" class="form-control" placeholder="Nama" required></div>
@@ -57,7 +56,6 @@
     </div>
   </form>
 
-  <!-- Import Excel/CSV -->
   <form action="controll.php" method="post" enctype="multipart/form-data" class="mb-3">
     <div class="row g-2">
       <div class="col-md-6">
@@ -69,8 +67,7 @@
     </div>
   </form>
 
- <!-- Export dengan filter kota -->
-<form action="controll.php" method="post" class="d-flex align-items-center justify-content-start gap-2 mb-3 flex-wrap">
+ <form action="controll.php" method="post" class="d-flex align-items-center justify-content-start gap-2 mb-3 flex-wrap">
   <label for="filter_kota" class="form-label mb-0 me-2 fw-semibold">Filter Kota:</label>
 
   <select name="filter_kota" id="filter_kota" class="form-select" style="width: 220px;">
@@ -88,7 +85,6 @@
 </form>
 
 
-  <!-- total tamu -->
   <div class="row mb-3 mt-2">
     <div class="col-md-6">
       <div class="alert alert-success mb-0">
@@ -102,7 +98,6 @@
     </div>
   </div>
 
-  <!-- Tabel -->
   <table class="table table-bordered table-striped mt-3">
     <thead>
       <tr>
@@ -148,7 +143,6 @@
           </td>
         </tr>
 
-        <!-- Modal Edit -->
         <div class="modal fade" id="editModal<?= $row['id'] ?>" tabindex="-1">
           <div class="modal-dialog">
             <div class="modal-content">

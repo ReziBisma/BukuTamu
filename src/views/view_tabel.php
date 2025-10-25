@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<?php include 'header.php'; ?>
+<?php include __DIR__ . '/header.php'; ?>
 
 <div class="container my-4">
 
@@ -16,13 +16,11 @@
     <h3 class="fw-bold">📊 Dashboard</h3>
     <p class="text-muted">Menampilkan data tamu yang telah terdaftar dan status kehadirannya.</p>
 
-    <!-- Tombol Beli Tiket -->
     <a href="beli_tiket.php" class="btn btn-ticket mt-2">
       🎟️ Beli Tiket Sekarang
     </a>
   </div>
 
-  <!-- Statistik -->
   <div class="row mb-4 text-center">
     <div class="col-md-3 mb-2">
       <div class="card card-stat bg-success text-white">
@@ -58,7 +56,6 @@
     </div>
   </div>
 
-  <!-- Tabel tamu -->
   <div class="card shadow-sm">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
       <h5 class="mb-0"><i class="bi bi-table"></i> Daftar Tamu (<?= $total_data ?> total)</h5>
@@ -106,7 +103,6 @@
     </div>
   </div>
 
-  <!-- Pagination -->
   <nav class="mt-3">
     <ul class="pagination justify-content-center">
       <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">

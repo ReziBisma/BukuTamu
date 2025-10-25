@@ -1,7 +1,5 @@
-<!-- Navbar -->
 <nav class="navbar shadow-sm mb-4" style="background-color: #FFD700;">
   <div class="container-fluid">
-    <!-- Tombol untuk membuka sidebar -->
     <button class="btn btn-outline-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">
       ☰
     </button>
@@ -11,7 +9,6 @@
   </div>
 </nav>
 
-<!-- Sidebar (Offcanvas) -->
 <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu" style="background-color: #FFD700; color: black;">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title" style="color: black;">Menu</h5>

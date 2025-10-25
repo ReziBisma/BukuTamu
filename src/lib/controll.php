@@ -1,6 +1,7 @@
 <?php
-require 'koneksi.php';
-require 'cipher.php';
+require __DIR__ . '/../src/config/koneksi.php';
+require __DIR__ . '/../src/lib/cipher.php';
+use PhpOffice\PhpSpreadsheet\IOFactory;
 session_start();
 
 $action = $_POST['action'] ?? '';
@@ -68,8 +69,8 @@ if ($action === 'import_excel') {
     $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
     $rows = [];
 
-    if (in_array($ext, ['xlsx', 'xls']) && file_exists(__DIR__ . '/vendor/autoload.php')) {
-        require_once __DIR__ . '/vendor/autoload.php';
+    if (in_array($ext, ['xlsx', 'xls']) && file_exists(__DIR__ . '/../vendor/autoload.php')) {
+        require_once __DIR__ . '/../vendor/autoload.php';
         $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($tmpPath);
         $spreadsheet = $reader->load($tmpPath);
         $sheet = $spreadsheet->getActiveSheet();
@@ -258,6 +259,4 @@ if ($action === 'export_csv') {
     fclose($output);
     exit;
 }
-
-
 ?>

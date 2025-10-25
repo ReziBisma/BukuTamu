@@ -10,7 +10,7 @@ session_start();
   <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
-<?php include 'header.php'; ?>
+<?php include __DIR__ . '/../src/views/header.php'; ?>
 
 <div class="container mt-4">
   <h3>Scan QR / Barcode Tamu</h3>

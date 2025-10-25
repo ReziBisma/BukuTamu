@@ -1,7 +1,7 @@
 <?php
-require __DIR__ . '/vendor/autoload.php';
-require 'koneksi.php';
-require 'cipher.php';
+require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../src/config/koneksi.php';
+require __DIR__ . '/../src/lib/cipher.php';
 session_start();
 
 use Endroid\QrCode\QrCode;
@@ -24,7 +24,6 @@ if ($res) {
     }
 }
 
-
 // Panggil view manajemen
-include 'view_manage.php';
-
+include __DIR__ . '/../src/views/view_manage.php';
+?>

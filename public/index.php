@@ -1,6 +1,6 @@
 <?php
-require 'koneksi.php';
-require 'cipher.php';
+require __DIR__ . '/../src/config/koneksi.php';
+require __DIR__ . '/../src/lib/cipher.php';
 session_start();
 
 // Pagination setup
@@ -23,5 +23,5 @@ $total_reg = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS jml FROM
 // Ambil data sesuai halaman
 $result = mysqli_query($conn, "SELECT * FROM tamu ORDER BY id DESC LIMIT $limit OFFSET $offset");
 
-include 'view_tabel.php';
-
+include __DIR__ . '/../src/views/view_tabel.php';
+?>

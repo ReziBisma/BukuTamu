@@ -1,7 +1,7 @@
 <?php
 session_start();
-require 'koneksi.php';
-require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '/../src/config/koneksi.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
@@ -69,7 +69,7 @@ if (isset($_GET['success']) && isset($_SESSION['qr_image'])) {
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 </head>
 <body>
-<?php include 'header.php'; ?>
+<?php include __DIR__ . '/../src/views/header.php'; ?>
 
 <div class="container mt-4">
   <h3>Beli Tiket Acara</h3>
@@ -119,7 +119,6 @@ if (isset($_GET['success']) && isset($_SESSION['qr_image'])) {
     <a href="download_qr.php?id=<?= urlencode($id_tamu) ?>" class="btn btn-primary mt-2">📥 Download QR</a>
 
 
-    <!-- Modal QR besar -->
     <div class="modal fade" id="qrModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-transparent border-0">

@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
@@ -21,3 +21,4 @@ header('Content-Disposition: attachment; filename="QR_' . $id_tamu . '.png"');
 
 echo $result->getString();
 exit;
+?>
