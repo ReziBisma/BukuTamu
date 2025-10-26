@@ -1,0 +1,38 @@
+/* .header-fixed {
+  
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 1030;
+} */
+
+body {
+    /* background: #f8f9fa; */
+    font-family: "Segoe UI", sans-serif;
+}
+
+.sidebar-fixed {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    /* padding: 20px; */
+    border-right: 1px solid #dee2e6;
+}
+
+.main-content {
+    margin-top: 0;
+    margin-left: 200px;
+    padding: 20px;
+}
+
+/* Styling tambahan untuk link sidebar (opsional) */
+.sidebar-fixed .nav-link {
+    color: black;
+}
+
+.sidebar-fixed .nav-link:hover:not(.active) {
+    /* background-color: rgba(0, 0, 0, 0.1); Efek hover */
+    color: #0d6efd;
+}

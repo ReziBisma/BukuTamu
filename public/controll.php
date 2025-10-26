@@ -1,6 +1,6 @@
 <?php
-require 'koneksi.php';
-require 'cipher.php';
+require __DIR__ . '/../src/config/koneksi.php';
+require __DIR__ . '/../src/lib/cipher.php';
 session_start();
 
 $action = $_POST['action'] ?? '';
@@ -37,7 +37,7 @@ if ($action === 'update') {
     $stmt->execute();
 
     $_SESSION['msg'] = "Data berhasil diupdate.";
-    header("Location: index.php");
+    header("Location: export_import.php");
     exit;
 }
 
@@ -50,7 +50,7 @@ if ($action === 'delete') {
     $stmt->execute();
 
     $_SESSION['msg'] = "Data berhasil dihapus.";
-    header("Location: index.php");
+    header("Location: export_import.php");
     exit;
 }
 
@@ -59,7 +59,7 @@ if ($action === 'delete') {
 if ($action === 'import_excel') {
     if (!isset($_FILES['excel_file']) || $_FILES['excel_file']['error'] !== UPLOAD_ERR_OK) {
         $_SESSION['msg'] = "Gagal upload file.";
-        header("Location: index.php");
+        header("Location: export_import.php");
         exit;
     }
 
@@ -68,8 +68,8 @@ if ($action === 'import_excel') {
     $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
     $rows = [];
 
-    if (in_array($ext, ['xlsx', 'xls']) && file_exists(__DIR__ . '/vendor/autoload.php')) {
-        require_once __DIR__ . '/vendor/autoload.php';
+    if (in_array($ext, ['xlsx', 'xls']) && file_exists(__DIR__ . '/../vendor/autoload.php')) {
+        require_once __DIR__ . '/../vendor/autoload.php';
         $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($tmpPath);
         $spreadsheet = $reader->load($tmpPath);
         $sheet = $spreadsheet->getActiveSheet();
@@ -258,6 +258,4 @@ if ($action === 'export_csv') {
     fclose($output);
     exit;
 }
-
-
 ?>

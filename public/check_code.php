@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'koneksi.php';
+require __DIR__ . '/../src/config/koneksi.php';
 
 if (isset($_POST['code'])) {
     $code = trim($_POST['code']);
