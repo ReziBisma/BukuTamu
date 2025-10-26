@@ -56,7 +56,7 @@
         <thead>
           <tr>
             <th>Nama</th>
-            <th>Kota</th>
+            <th>Lokasi Acara</th>
             <th>Email</th>
             <th>Role</th>
             <th>Kehadiran</th>
