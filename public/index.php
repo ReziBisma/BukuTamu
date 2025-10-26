@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/../src/config/koneksi.php';
-require __DIR__ . '/../src/lib/cipher.php';
+require __DIR__ . '/../src/lib/cipher.php'; // diperlukan oleh view_tabel
 session_start();
 
 // Pagination setup
@@ -23,5 +23,26 @@ $total_reg = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS jml FROM
 // Ambil data sesuai halaman
 $result = mysqli_query($conn, "SELECT * FROM tamu ORDER BY id DESC LIMIT $limit OFFSET $offset");
 
-include __DIR__ . '/../src/views/view_tabel.php';
 ?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Buku Tamu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="assets/style.css"> <!-- Load CSS -->
+</head>
+<body>
+    <?php include __DIR__ . '/../src/views/partials/_header.php'; ?>
+    <?php include __DIR__ . '/../src/views/partials/_sidebar.php'; ?>
+
+    <!-- ==================== MAIN CONTENT AREA ==================== -->
+    <div class="main-content">
+        <?php include __DIR__ . '/../src/views/view_tabel.php'; // Include konten tabel ?>
+    </div> <!-- Akhir Main Content -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

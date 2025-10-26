@@ -1,24 +1,12 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <title>Dashboard</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-</head>
-<body>
-
-<?php include __DIR__ . '/header.php'; ?>
-
 <div class="container my-4">
 
-  <div class="mb-4 text-center">
-    <h3 class="fw-bold">📊 Dashboard</h3>
+  <div class="mb-4">
+    <h3 class="fw-bold">Dashboard</h3>
     <p class="text-muted">Menampilkan data tamu yang telah terdaftar dan status kehadirannya.</p>
 
-    <a href="beli_tiket.php" class="btn btn-ticket mt-2">
+    <!-- <a href="beli_tiket.php" class="btn btn-ticket mt-2">
       🎟️ Beli Tiket Sekarang
-    </a>
+    </a> -->
   </div>
 
   <div class="row mb-4 text-center">
@@ -31,7 +19,7 @@
       </div>
     </div>
     <div class="col-md-3 mb-2">
-      <div class="card card-stat bg-warning text-dark">
+      <div class="card card-stat bg-danger text-white">
         <div class="card-body">
           <i class="bi bi-person-x display-6"></i>
           <h5><?= $total_tidak ?> Tidak Hadir</h5>
@@ -47,7 +35,7 @@
       </div>
     </div>
     <div class="col-md-3 mb-2">
-      <div class="card card-stat bg-info text-white">
+      <div class="card card-stat bg-secondary text-white">
         <div class="card-body">
           <i class="bi bi-people-fill display-6"></i>
           <h5><?= $total_reg ?> Reguler</h5>
@@ -59,7 +47,7 @@
   <div class="card shadow-sm">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
       <h5 class="mb-0"><i class="bi bi-table"></i> Daftar Tamu (<?= $total_data ?> total)</h5>
-      <a href="export_import.php" class="btn btn-outline-secondary btn-sm">
+      <a href="export_import.php" class="btn btn-outline-primary btn-sm">
         <i class="bi bi-box-arrow-up-right"></i> Kelola Data
       </a>
     </div>
@@ -82,15 +70,15 @@
                 <td><?= htmlspecialchars($row['lokasi_acara']) ?></td>
                 <td><?= htmlspecialchars(encryptCaesar($row['email'], 3)) ?></td>
                 <td>
-                  <span class="badge bg-<?= $row['role']=='VIP'?'primary':'secondary' ?>">
+                  <span class="badge p-2 bg-<?= $row['role']=='VIP'?'primary':'secondary' ?>">
                     <?= $row['role'] ?>
                   </span>
                 </td>
                 <td>
                   <?php if ($row['kehadiran'] == 'Hadir'): ?>
-                    <span class="badge bg-success">Hadir</span>
+                    <span class="badge bg-success p-2">Hadir</span>
                   <?php else: ?>
-                    <span class="badge bg-danger">Tidak Hadir</span>
+                    <span class="badge bg-danger p-2">Tidak Hadir</span>
                   <?php endif; ?>
                 </td>
               </tr>
@@ -106,7 +94,7 @@
   <nav class="mt-3">
     <ul class="pagination justify-content-center">
       <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-        <a class="page-link" href="?page=<?= $page - 1 ?>">Sebelumnya</a>
+        <a class="page-link" href="?page=<?= $page - 1 ?>"><b><<</b></a>
       </li>
       <?php for ($i = 1; $i <= $total_pages; $i++): ?>
         <li class="page-item <?= ($page == $i) ? 'active' : '' ?>">
@@ -114,13 +102,9 @@
         </li>
       <?php endfor; ?>
       <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
-        <a class="page-link" href="?page=<?= $page + 1 ?>">Selanjutnya</a>
+        <a class="page-link" href="?page=<?= $page + 1 ?>"><b>>></b></a>
       </li>
     </ul>
   </nav>
 
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>

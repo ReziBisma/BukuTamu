@@ -1,7 +1,6 @@
 <?php
 require __DIR__ . '/../src/config/koneksi.php';
 require __DIR__ . '/../src/lib/cipher.php';
-use PhpOffice\PhpSpreadsheet\IOFactory;
 session_start();
 
 $action = $_POST['action'] ?? '';
@@ -38,7 +37,7 @@ if ($action === 'update') {
     $stmt->execute();
 
     $_SESSION['msg'] = "Data berhasil diupdate.";
-    header("Location: index.php");
+    header("Location: export_import.php");
     exit;
 }
 
@@ -51,7 +50,7 @@ if ($action === 'delete') {
     $stmt->execute();
 
     $_SESSION['msg'] = "Data berhasil dihapus.";
-    header("Location: index.php");
+    header("Location: export_import.php");
     exit;
 }
 
@@ -60,7 +59,7 @@ if ($action === 'delete') {
 if ($action === 'import_excel') {
     if (!isset($_FILES['excel_file']) || $_FILES['excel_file']['error'] !== UPLOAD_ERR_OK) {
         $_SESSION['msg'] = "Gagal upload file.";
-        header("Location: index.php");
+        header("Location: export_import.php");
         exit;
     }
 

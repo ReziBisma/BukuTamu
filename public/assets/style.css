@@ -1,97 +1,38 @@
-body {
-  background: #f8f9fa;
-  font-family: "Segoe UI", sans-serif;
-}
-header {
-  text-align: center;
-  padding: 30px 0;
-  background: linear-gradient(135deg, #007bff, #00c6ff);
-  color: white;
-  margin-bottom: 30px;
-  border-radius: 0 0 20px 20px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-h1 {
-  font-weight: bold;
-  margin: 0;
-}
-.table {
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-.table thead {
-  background: #007bff;
-  color: white;
-  font-weight: bold;
-  text-align: center;
-}
-.table tbody tr:hover {
-  background: #f1faff;
-}
-input[disabled] {
-  background: transparent !important;
-  border: none;
-  box-shadow: none;
-  cursor: default;
-}
-.btn {
-  border-radius: 20px;
-  transition: 0.3s;
-}
-.btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-}
-.modal-content {
-  border-radius: 15px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
-.modal-header {
-  background: #007bff;
-  color: white;
-  border-radius: 15px 15px 0 0;
-}
-.modal-title {
-  font-weight: bold;
-}
-tfoot input {
-  border-radius: 10px;
-}
+/* .header-fixed {
+  
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 1030;
+} */
 
 body {
-      background: #f8fafc;
-      font-family: 'Poppins', sans-serif;
-    }
-    .card-stat {
-      border: none;
-      border-radius: 12px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-      transition: 0.3s;
-    }
-    .card-stat:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-    }
-    .table th {
-      background: #f1f5f9;
-    }
-    .btn-ticket {
-      border-radius: 50px;
-      font-weight: 600;
-      padding: 10px 30px;
-      font-size: 18px;
-      background: linear-gradient(45deg, #ff8a00, #e52e71);
-      border: none;
-      color: white;
-      box-shadow: 0 4px 10px rgba(229,46,113,0.4);
-      transition: 0.3s;
-    }
-    .btn-ticket:hover {
-      background: linear-gradient(45deg, #e52e71, #ff8a00);
-      transform: scale(1.05);
-    }
-    .pagination .page-link {
-      border-radius: 8px;
-    }
+    /* background: #f8f9fa; */
+    font-family: "Segoe UI", sans-serif;
+}
+
+.sidebar-fixed {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    /* padding: 20px; */
+    border-right: 1px solid #dee2e6;
+}
+
+.main-content {
+    margin-top: 0;
+    margin-left: 200px;
+    padding: 20px;
+}
+
+/* Styling tambahan untuk link sidebar (opsional) */
+.sidebar-fixed .nav-link {
+    color: black;
+}
+
+.sidebar-fixed .nav-link:hover:not(.active) {
+    /* background-color: rgba(0, 0, 0, 0.1); Efek hover */
+    color: #0d6efd;
+}
