@@ -119,7 +119,7 @@ if (!isset($kotaQuery)) {
         </thead>
         <tbody>
           <?php if (isset($result) && mysqli_num_rows($result) > 0):
-            mysqli_data_seek($result, 0); // Reset pointer jika $result dari query lain
+            mysqli_data_seek($result, 0);
             while ($row = mysqli_fetch_assoc($result)): ?>
               <tr>
                 <td class="text-center"><small><?= htmlspecialchars($row['id_tamu']) ?></small></td>

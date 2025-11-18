@@ -1,8 +1,6 @@
 <?php
-// Mendapatkan nama file saat ini untuk menandai link aktif
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
-<!-- ==================== SIDEBAR ==================== -->
 <div class="sidebar-fixed">
     <div class="bg-primary text-light text-center">
         <h4 class="fw-bold pt-4 me-3 px-3">
