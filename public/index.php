@@ -41,7 +41,7 @@ $result = mysqli_query($conn, "SELECT * FROM tamu ORDER BY id DESC LIMIT $limit 
     <!-- ==================== MAIN CONTENT AREA ==================== -->
     <div class="main-content">
         <?php include __DIR__ . '/../src/views/view_tabel.php'; // Include konten tabel ?>
-    </div> <!-- Akhir Main Content -->
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
