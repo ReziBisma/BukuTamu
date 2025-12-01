@@ -134,18 +134,48 @@ if ($action === 'import_excel') {
 }
 
 
-if ($action === 'export_csv') {
+if ($action === 'export_pdf') {
+
+    require('fpdf/fpdf.php');
+
+    class PDF extends FPDF
+    {
+        function Header()
+        {
+            $this->SetFont('Arial', 'B', 14);
+            $this->Cell(0, 10, 'Laporan Buku Tamu Lawakfest', 0, 1, 'C');
+            $this->Ln(3);
+        }
+
+        function TableHeader($header)
+        {
+            $this->SetFont('Arial', 'B', 10);
+            foreach ($header as $col) {
+                $this->Cell(35, 8, $col, 1, 0, 'C');
+            }
+            $this->Ln();
+        }
+
+        function TableRow($data)
+        {
+            $this->SetFont('Arial', '', 10);
+
+            foreach ($data as $col) {
+                $text = is_numeric($col) ? $col : $col;
+                $this->Cell(35, 8, $text, 1);
+            }
+            $this->Ln();
+        }
+    }
+
     $filterKota = $_POST['filter_kota'] ?? 'semua';
-    $filename = "buku_tamu_export_" . date("Y-m-d_H-i-s") . ".csv";
 
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename=' . $filename);
-    $output = fopen('php://output', 'w');
+    $pdf = new PDF('L', 'mm', 'A4'); 
+    $pdf->AddPage();
 
-    // Header kolom CSV utama
-    fputcsv($output, ['ID Tamu', 'Nama', 'Lokasi Acara', 'Email', 'Role', 'Kehadiran']);
-
-    // Ambil harga tiket dari tabel produk
+    // ================================
+    // AMBIL HARGA VIP & REGULER
+    // ================================
     $hargaVIP = 0;
     $hargaReg = 0;
     $resHarga = mysqli_query($conn, "SELECT * FROM produk");
@@ -157,15 +187,21 @@ if ($action === 'export_csv') {
         }
     }
 
+    // ================================
+    // TABEL UTAMA
+    // ================================
+    $header = ['ID Tamu', 'Nama', 'Lokasi', 'Email', 'Role', 'Kehadiran'];
+    $pdf->TableHeader($header);
+
     if ($filterKota !== 'semua') {
-        // FILTER berdasarkan satu kota
+        // Filter satu kota
         $stmt = $conn->prepare("SELECT id_tamu, nama, lokasi_acara, email, role, kehadiran FROM tamu WHERE lokasi_acara=?");
         $stmt->bind_param("s", $filterKota);
         $stmt->execute();
         $result = $stmt->get_result();
 
         while ($row = $result->fetch_assoc()) {
-            fputcsv($output, [
+            $pdf->TableRow([
                 $row['id_tamu'],
                 $row['nama'],
                 $row['lokasi_acara'],
@@ -175,7 +211,13 @@ if ($action === 'export_csv') {
             ]);
         }
 
-        // Hitung rekap kehadiran + role + total pendapatan kota
+        // ================================
+        // REKAP FILTER KOTA
+        // ================================
+        $pdf->Ln(5);
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell(0, 8, "Rekap Kota: $filterKota", 0, 1);
+
         $rekap = mysqli_query($conn, "
             SELECT 
               SUM(CASE WHEN kehadiran='Hadir' THEN 1 ELSE 0 END) AS total_hadir,
@@ -184,15 +226,13 @@ if ($action === 'export_csv') {
               SUM(CASE WHEN role='Reguler' THEN 1 ELSE 0 END) AS total_reguler
             FROM tamu WHERE lokasi_acara='$filterKota'
         ");
-        $rekapData = mysqli_fetch_assoc($rekap);
 
+        $rekapData = mysqli_fetch_assoc($rekap);
         $totalPeserta = $rekapData['total_hadir'] + $rekapData['total_tidak'];
         $totalPendapatan = ($rekapData['total_vip'] * $hargaVIP) + ($rekapData['total_reguler'] * $hargaReg);
 
-        fputcsv($output, []);
-        fputcsv($output, ['Rekap Kota', 'Total Peserta', 'Hadir', 'Tidak Hadir', 'VIP', 'Reguler', 'Pendapatan (Rp)']);
-        fputcsv($output, [
-            $filterKota,
+        $pdf->TableHeader(['Total Peserta','Hadir','Tidak','VIP','Reguler','Pendapatan']);
+        $pdf->TableRow([
             $totalPeserta,
             $rekapData['total_hadir'],
             $rekapData['total_tidak'],
@@ -202,10 +242,12 @@ if ($action === 'export_csv') {
         ]);
 
     } else {
-        // SEMUA KOTA
+
+        // SEMUA DATA KOTA
         $result = mysqli_query($conn, "SELECT id_tamu, nama, lokasi_acara, email, role, kehadiran FROM tamu");
+
         while ($row = mysqli_fetch_assoc($result)) {
-            fputcsv($output, [
+            $pdf->TableRow([
                 $row['id_tamu'],
                 $row['nama'],
                 $row['lokasi_acara'],
@@ -215,9 +257,14 @@ if ($action === 'export_csv') {
             ]);
         }
 
-        fputcsv($output, []);
-        fputcsv($output, ['Rekap Per Kota']);
-        fputcsv($output, ['Kota', 'Total Hadir', 'Total Tidak Hadir', 'Total Pengunjung', 'VIP', 'Reguler', 'Pendapatan (Rp)']);
+        // ================================
+        // REKAP SEMUA KOTA
+        // ================================
+        $pdf->Ln(5);
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell(0, 8, "Rekap Semua Kota", 0, 1);
+
+        $pdf->TableHeader(['Kota','Hadir','Tidak','Total','VIP','Reguler','Pendapatan']);
 
         $rekapAll = mysqli_query($conn, "
             SELECT lokasi_acara,
@@ -229,33 +276,24 @@ if ($action === 'export_csv') {
             GROUP BY lokasi_acara
         ");
 
-        $grandTotalPeserta = 0;
-        $grandTotalPendapatan = 0;
+        while ($r = mysqli_fetch_assoc($rekapAll)) {
+            $totalPeserta = $r['total_hadir'] + $r['total_tidak'];
+            $pendapatan = ($r['total_vip'] * $hargaVIP) + ($r['total_reguler'] * $hargaReg);
 
-        while ($rekap = mysqli_fetch_assoc($rekapAll)) {
-            $totalPeserta = $rekap['total_hadir'] + $rekap['total_tidak'];
-            $pendapatan = ($rekap['total_vip'] * $hargaVIP) + ($rekap['total_reguler'] * $hargaReg);
-
-            $grandTotalPeserta += $totalPeserta;
-            $grandTotalPendapatan += $pendapatan;
-
-            fputcsv($output, [
-                $rekap['lokasi_acara'],
-                $rekap['total_hadir'],
-                $rekap['total_tidak'],
-                $totalPeserta, // 🔹 kolom baru: total pengunjung
-                $rekap['total_vip'],
-                $rekap['total_reguler'],
+            $pdf->TableRow([
+                $r['lokasi_acara'],
+                $r['total_hadir'],
+                $r['total_tidak'],
+                $totalPeserta,
+                $r['total_vip'],
+                $r['total_reguler'],
                 number_format($pendapatan, 0, ',', '.')
             ]);
         }
-
-        // Tambahkan total keseluruhan
-        fputcsv($output, []);
-        fputcsv($output, ['Total Keseluruhan', '', '', $grandTotalPeserta, '', '', number_format($grandTotalPendapatan, 0, ',', '.')]);
     }
 
-    fclose($output);
+    // OUTPUT
+    $pdf->Output("D", "buku_tamu_export_".date("Y-m-d_H-i-s").".pdf");
     exit;
 }
 ?>

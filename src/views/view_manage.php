@@ -69,8 +69,8 @@ if (!isset($kotaQuery)) {
                 </option>
               <?php endwhile; ?>
             </select>
-            <button type="submit" name="action" value="export_csv" class="btn btn-info text-nowrap">
-              <i class="bi bi-file-earmark-arrow-down me-1"></i> Export CSV
+            <button type="submit" name="action" value="export_pdf" class="btn btn-info text-nowrap">
+              <i class="bi bi-file-earmark-arrow-down me-1"></i> Export pdf
             </button>
           </div>
         </form>
