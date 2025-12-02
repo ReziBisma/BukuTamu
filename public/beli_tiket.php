@@ -5,6 +5,10 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
+use SendinBlue\Client\Configuration;
+use SendinBlue\Client\Api\TransactionalEmailsApi;
+use SendinBlue\Client\Model\SendSmtpEmail;
+use GuzzleHttp\Client;
 
 $produk_query = mysqli_query($conn, "SELECT * FROM produk"); // Ubah nama variabel agar tidak konflik
 $qrImage = null;
@@ -39,7 +43,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = $writer->write($qr);
     $qrImage = base64_encode($result->getString());
 
-    $msg = "Transaksi berhasil dibuat! Berikut QR ID Anda.";
+    $config = Configuration::getDefaultConfiguration()->setApiKey(
+    'api-key',
+    'api key mu'
+);
+
+$apiInstance = new TransactionalEmailsApi(
+    new GuzzleHttp\Client(),
+    $config
+);
+
+$emailData = new SendSmtpEmail([
+    'sender' => [
+        'name' => 'Panitia Lawakfest',
+        'email' => 'lawaktick@gmail.com'
+    ],
+    'to' => [
+        ['email' => $email, 'name' => $nama]
+    ],
+    'subject' => "Tiket Lawakfest – ID Tamu: $id_tamu_new",
+    'htmlContent' => "
+        <p>Halo <strong>$nama</strong>,</p>
+        <p>Terima kasih telah membeli tiket <strong>$role</strong> Lawakfest!</p>
+        <p>
+            Berikut detail tiket Anda:<br>
+            ID Tamu: <strong>$id_tamu_new</strong><br>
+            Email: $email<br>
+            Kota Acara: $kota<br>
+            Harga: Rp " . number_format($harga, 0, ',', '.') . "
+        </p>
+        <p>QR tiket Anda terlampir di email ini.</p>
+        <p>Salam,<br><strong>Panitia Lawakfest</strong></p>
+    ",
+    'attachment' => [
+        [
+            'content' => base64_encode($result->getString()),
+            'name' => "QR_Ticket_$id_tamu_new.png"
+        ]
+    ]
+]);
+
+try {
+    $response = $apiInstance->sendTransacEmail($emailData);
+    error_log("Email terkirim: " . print_r($response, true));
+} catch (Exception $e) {
+    error_log("Gagal kirim email: " . $e->getMessage());
+}
+
+    $msg = "Transaksi berhasil dibuat! silahkan cek Email, atau download QR langsung.";
 
     // Simpan ke session
     $_SESSION['qr_image'] = $qrImage;
@@ -76,85 +127,11 @@ if (isset($_GET['success']) && isset($_SESSION['qr_image'])) {
     <?php include __DIR__ . '/../src/views/partials/_header.php'; ?>
     <?php include __DIR__ . '/../src/views/partials/_sidebar.php'; ?>
 
-    <div class="main-content">
-        <div class="container mt-4 mb-5">
-            <h3 class="fw-bold">Beli Tiket Acara</h3>
-            <p>Pilih jenis tiket dan lengkapi data Anda untuk mendapatkan QR Ticket Masuk.</p>
+     <div class="main-content">
+        <?php include __DIR__ . '/../src/views/view_beli.php'; // Include konten manajemen ?>
+    </div> <!-- Akhir Main Content -->
 
-            <?php if ($msg): ?>
-                <div class="alert alert-success"><?= htmlspecialchars($msg) ?></div>
-            <?php endif; ?>
-
-            <form method="post" class="mb-4 card card-body shadow-sm" id="formBeliTiket">
-                <div class="mb-3">
-                    <label class="form-label">Nama</label>
-                    <input type="text" name="nama" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Email</label>
-                    <input type="email" name="email" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Kota (Lokasi Acara)</label>
-                    <input type="text" name="kota" class="form-control" placeholder="Contoh: Jakarta" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Pilih Tiket</label>
-                    <select name="produk" class="form-select" required>
-                        <option value="">-- Pilih Tiket --</option>
-                        <?php
-                        if (isset($produk_query) && $produk_query) {
-                            mysqli_data_seek($produk_query, 0); 
-                            while ($p = mysqli_fetch_assoc($produk_query)):
-                        ?>
-                                <option value="<?= $p['id_produk'] ?>">
-                                    <?= htmlspecialchars($p['nama_produk']) ?> - Rp<?= number_format($p['harga'], 0, ',', '.') ?>
-                                </option>
-                        <?php
-                            endwhile;
-                        }
-                        ?>
-                    </select>
-                </div>
-
-                <button type="submit" class="btn btn-success" id="tombolSubmit">
-                    <span id="submitText">Buat Transaksi</span>
-                    <span id="submitSpinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
-                </button>
-            </form>
-
-            <?php if ($qrImage): ?>
-                <hr>
-                <h5>ID Tamu Anda: <span class="text-primary"><?= htmlspecialchars($id_tamu_generated) ?></span></h5>
-                <div class="text-center">
-                    <img src="data:image/png;base64,<?= $qrImage ?>" class="img-thumbnail" width="200" height="200"
-                        style="cursor:pointer" data-bs-toggle="modal" data-bs-target="#qrModal" alt="QR Code">
-                    <p class="mt-2">📌 Tap QR Code untuk memperbesar</p>
-                    <!-- <p class="mt-2">📌 Tap QR Code untuk memperbesar atau scan langsung dengan HP.</p> -->
-                </div>
-
-                <a href="download_qr.php?id=<?= urlencode($id_tamu_generated) ?>" class="btn btn-primary mt-2 d-flex justify-content-center">📥 Download QR</a>
-
-                <!-- <div class="text-center mt-4">
-                    <h6>Simulasi Pembayaran:</h6>
-                    <img src="assets/qris.jpg" alt="QRIS" style="max-width:250px" class="img-fluid">
-                    <p class="text-muted">Bayar melalui QRIS ini (simulasi, tidak perlu benar-benar membayar).</p>
-                </div> -->
-
-                <!-- Modal QR  -->
-                <div class="modal fade" id="qrModal" tabindex="-1">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content bg-transparent border-0">
-                            <div class="modal-body text-center">
-                                <img src="data:image/png;base64,<?= $qrImage ?>" class="img-fluid" alt="QR Code Besar">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            <?php endif; ?>
-
-        </div>
-    </div>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Prosee loading setelah submit -->
