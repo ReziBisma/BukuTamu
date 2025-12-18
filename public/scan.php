@@ -1,5 +1,5 @@
 <?php
-session_start();
+require __DIR__ . '/../src/middleware/auth_admin.php';
 ?>
 <?php include __DIR__ . '/../src/views/partials/_header.php'; ?>
 <?php include __DIR__ . '/../src/views/partials/_sidebar.php'; ?>

@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $config = Configuration::getDefaultConfiguration()->setApiKey(
     'api-key',
-    'api key mu'
+    'apikey kalian'
 );
 
 $apiInstance = new TransactionalEmailsApi(

@@ -1,8 +1,8 @@
 <?php
+require __DIR__ . '/../src/middleware/auth_admin.php';
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../src/config/koneksi.php';
 require __DIR__ . '/../src/lib/cipher.php'; // diperlukan oleh view_manage
-session_start();
 
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
