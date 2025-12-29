@@ -11,8 +11,8 @@ $isLogin = isset($_SESSION['login']) && $_SESSION['login'] === true;
 <div class="sidebar-fixed d-flex flex-column justify-content-between">
     <!-- BAGIAN ATAS -->
     <div>
-        <div class="bg-primary text-light text-center">
-            <h4 class="fw-bold pt-4 me-3 px-3">
+        <div class="bg-primary text-light text-center py-4">
+            <h4 class="fw-bold me-3 px-3 mb-1">
                 <a class="navbar-brand text-light text-decoration-none" href="index.php">
                     <div class="pe-4">PEMBUKUAN</div>
                     <div class="ps-5">LAWAKFEST</div>

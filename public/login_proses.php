@@ -18,7 +18,7 @@ if ($admin && password_verify($password, $admin['password'])) {
     $_SESSION['admin_id'] = $admin['id_admin'];
     $_SESSION['admin_nama'] = $admin['nama_admin'];
 
-    header("Location: ../public/index.php");
+    header("Location: index.php");
     exit;
 }
 
